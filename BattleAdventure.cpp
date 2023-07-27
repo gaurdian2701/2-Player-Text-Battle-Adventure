@@ -17,6 +17,8 @@ protected:
     int lowerHealLimit;
     int upperHealLimit;
     int randomNumber;
+    int additionalDamage;
+    int currentHealth;
 
 public:
     bool specialActivated = false;
@@ -27,98 +29,85 @@ public:
     bool isAlive = true;
 
 public:
-    Player(std::string pID, std::string pType, int hp, int dps, int LADL, int UADL, int LHL, int UHL) : playerID(pID), playerType(pType), health(hp), baseDamage(dps), lowerAdditionalDamageLimit(LADL),
-                                                                                                        upperAdditionalDamageLimit(UADL), lowerHealLimit(LHL), upperHealLimit(UHL)
+    Player(std::string pID) : playerID(pID)
     {
-        health = hp;
-        baseDamage = dps;
-        playerType = pType;
         playerID = pID;
     }
 
 public:
     virtual ~Player() {}
 
-public:
     std::string GetPlayerID()
     {
         return playerID + ": ";
     }
 
-public:
     std::string GetPlayerType()
     {
         return playerType;
     }
 
-public:
     int GetHealth()
     {
         return health;
     }
 
-public:
     int GetBaseDamage()
     {
         return baseDamage;
     }
 
-public:
     int GetLowerAdditionalDamage()
     {
         return lowerAdditionalDamageLimit;
     }
 
-public:
     int GetUpperAdditionalDamage()
     {
         return upperAdditionalDamageLimit;
     }
 
-public:
     int GetLowerHealLimit()
     {
         return lowerHealLimit;
     }
 
-public:
     int GetUpperHealLimit()
     {
         return upperHealLimit;
     }
 
-public:
     bool aliveCheck()
     {
         return isAlive;
     }
 
-public:
     virtual void TakeDamage(T val) {}
 
-public:
     virtual void Heal() {}
 
-public:
     virtual int Attack() {}
 
-public:
     virtual void ActivateSpecialAbility() {}
 
-public:
     virtual void ActivatePassiveAbility() {}
 };
 
 class Knight : public Player<int>
 {
-    int additionalDamage;
-    int healAmount;
-    int currentHealth = GetHealth();
 
 public:
-    Knight(std::string playerID, std::string playerType, int health, int baseDamage, int LADL, int UADL, int LHL, int UHL) : Player(playerID, playerType, health, baseDamage, LADL, UADL, LHL, UHL)
+    Knight(std::string playerID) : Player(playerID)
     {
         std::cout << "\"I wish you well. I am a Knight of the Golden Age. I shall fight till I draw my last breath.\"\n\n";
+        playerType = "Knight";
+        health = 100;
+        baseDamage = 8;
+        lowerAdditionalDamageLimit = 4;
+        upperAdditionalDamageLimit = 6;
+        lowerHealLimit = 2;
+        upperHealLimit = 4;
+        currentHealth = health;
     }
 
 public:
@@ -140,6 +129,8 @@ public:
 public:
     void Heal() override
     {
+        int healAmount;
+
         std::cout << GetPlayerID() << "\n\n";
 
         if (currentHealth == health)
@@ -219,15 +210,20 @@ public:
 
 class Sorcerer : public Player<int>
 {
-    int additionalDamage;
-    int healAmount;
-    int currentHealth = GetHealth();
     bool reviveActive;
 
 public:
-    Sorcerer(std::string playerID, std::string playerType, int health, int baseDamage, int LADL, int UADL, int LHL, int UHL) : Player(playerID, playerType, health, baseDamage, LADL, UADL, LHL, UHL)
+    Sorcerer(std::string playerID) : Player(playerID)
     {
         std::cout << " \"Greetings. I am a Sorcerer of old. My wand shall be your sword and shield.\" \n";
+        playerType = "Sorcerer";
+        health = 80;
+        baseDamage = 12;
+        lowerAdditionalDamageLimit = 2;
+        upperAdditionalDamageLimit = 4;
+        lowerHealLimit = 4;
+        upperHealLimit = 6;
+        currentHealth = health;
     }
 
 public:
@@ -239,6 +235,7 @@ public:
 public:
     void Heal() override
     {
+        int healAmount;
         std::cout << GetPlayerID() << "\n\n";
 
         dealtStun = false;
@@ -322,16 +319,19 @@ public:
 
 class Barbarian : public Player<int>
 {
-    int additionalDamage;
-    int healAmount;
-    int currentHealth = GetHealth();
     int specialCounter = 0;
-    int randomNumber;
 
 public:
-    Barbarian(std::string playerID, std::string playerType, int health, int baseDamage, int LADL, int UADL, int LHL, int UHL) : Player(playerID, playerType, health, baseDamage, LADL, UADL, LHL, UHL)
+    Barbarian(std::string playerID) : Player(playerID)
     {
         std::cout << " \"AAAAAAAAA!. JUST LET ME KILL ALREADY! I WANT MORE BLOOOOOOOOOD!\" \n";
+        currentHealth = health;
+        health = 70;
+        baseDamage = 15;
+        lowerAdditionalDamageLimit = 1;
+        upperAdditionalDamageLimit = 4;
+        lowerHealLimit = 2;
+        upperHealLimit = 5;
     }
 
 public:
@@ -368,6 +368,8 @@ public:
 public:
     void Heal() override
     {
+        int healAmount;
+
         std::cout << GetPlayerID() << "\n\n";
 
         if (currentHealth == health)
@@ -430,6 +432,138 @@ public:
 
 class GameManager
 {
+
+    bool MakeChoice(Player<int> *&p, std::string id)
+    {
+        int choice;
+        bool check;
+
+        enum playerType
+        {
+
+            K = 1,
+            S = 2,
+            B = 3
+        };
+
+        std::cin >> choice;
+
+        if (!(choice >= K && choice <= B))
+        {
+            std::cout << "You have entered an invalid value. Please enter 1, 2, or 3\n\n";
+            std::cin.clear();
+            std::cin.ignore(256, '\n');
+            return false;
+        }
+
+        switch (choice)
+        {
+
+        case K:
+            std::cout << "You have chosen the Knight class.\n";
+            p = new Knight(id);
+
+            check = true;
+            break;
+
+        case S:
+            std::cout << "You have chosen the Sorcerer class.\n";
+            p = new Sorcerer(id);
+            check = true;
+            break;
+
+        case B:
+            std::cout << "You have chosen the Barbarian class.\n";
+            p = new Barbarian(id);
+            check = true;
+            break;
+
+        default:
+            std::cout << "Choose again.\n";
+            check = false;
+            break;
+        }
+
+        return check;
+    }
+
+    void GetPlayerInput(Player<int> *&p, std::string id)
+    {
+        bool check = false;
+
+        while (check == false)
+        {
+            std::cout << id << ", choose your class.\n";
+            check = MakeChoice(p, id);
+        }
+    }
+
+    void InitiateCombat(std::unique_ptr<Player<int>> &player1, std::unique_ptr<Player<int>> &player2)
+    {
+        while (player1->aliveCheck() && player2->aliveCheck())
+        {
+
+            std::string turnChoice;
+
+            if (player2->dealtStun)
+                std::cout << "Player 1 has been stunned, so their turn has been skipped.\n";
+
+            else if (!(player1->aliveCheck()))
+                break;
+
+            else
+            {
+                std::cout << "\nPLAYER 1's TURN:\n\n";
+                std::cout << "Player 1, enter 1 to attack, enter anything else to heal.\n";
+                std::cin >> turnChoice;
+                PrintBorder();
+
+                if (turnChoice == "1" && !(player2->dealtStun))
+                    player2->TakeDamage(player1->Attack());
+
+                else
+                    player1->Heal();
+
+                PrintBorder();
+            }
+
+            if (player1->dealtStun)
+                std::cout << "Player 2 has been stunned, so their turn has been skipped.\n";
+
+            else if (!(player2->aliveCheck()))
+                break;
+
+            else
+            {
+                std::cout << "\nPLAYER 2's TURN:\n\n";
+
+                std::cout << "Player 2, enter 1 to attack, enter anything else to heal.\n";
+                std::cin >> turnChoice;
+                PrintBorder();
+                if (turnChoice == "1" && !(player1->dealtStun))
+                    player1->TakeDamage(player2->Attack());
+
+                else if (!(player1->dealtStun))
+                    player2->Heal();
+
+                PrintBorder();
+            }
+        }
+    }
+
+    void DecideWinner(std::unique_ptr<Player<int>> &player1, std::unique_ptr<Player<int>> &player2)
+    {
+        if (player1->aliveCheck())
+            std::cout << "Player 1: " << player1->GetPlayerType() << " is the winner!\n\n";
+        else
+            std::cout << "Player 2: " << player2->GetPlayerType() << " is the winner!\n\n";
+    }
+
+    inline void PrintBorder()
+    {
+        std::cout << "-------------------------------------\n";
+    }
+
 public:
     void PrintInfo()
     {
@@ -492,143 +626,21 @@ public:
                   << "bloodthirsty rage with the ability to deal massive damage on his next attack.\n\n";
     }
 
-    bool MakeChoice(Player<int> *&p, std::string id)
-    {
-        int choice;
-        bool check;
-
-        enum playerType
-        {
-
-            K = 1,
-            S = 2,
-            B = 3
-        };
-
-        std::cin >> choice;
-
-        if (!(choice >= K && choice <= B))
-        {
-            std::cout << "You have entered an invalid value. Please enter 1, 2, or 3\n\n";
-            std::cin.clear();
-            std::cin.ignore(256, '\n');
-            return false;
-        }
-
-        switch (choice)
-        {
-
-        case K:
-            std::cout << "You have chosen the Knight class.\n";
-            p = new Knight(id, "Knight", 100, 8, 4, 6, 2, 4);
-
-            check = true;
-            break;
-
-        case S:
-            std::cout << "You have chosen the Sorcerer class.\n";
-            p = new Sorcerer(id, "Sorcerer", 80, 12, 2, 4, 4, 6);
-            check = true;
-            break;
-
-        case B:
-            std::cout << "You have chosen the Barbarian class.\n";
-            p = new Barbarian(id, "Barbarian", 70, 15, 1, 4, 2, 5);
-            check = true;
-            break;
-
-        default:
-            std::cout << "Choose again.\n";
-            check = false;
-            break;
-        }
-
-        return check;
-    }
-
-public:
     void PlayGame()
     {
         Player<int> *p1 = nullptr;
         Player<int> *p2 = nullptr;
 
-        bool check = false;
-
-        while (check == false)
-        {
-            std::cout << "Player 1, choose your class.\n";
-            check = MakeChoice(p1, "P1");
-        }
+        GetPlayerInput(p1, "P1");
+        GetPlayerInput(p2, "P2");
 
         std::unique_ptr<Player<int>> player1(p1);
-
-        check = false;
-
-        while (check == false)
-        {
-            std::cout << "Player 2, choose your class.\n";
-            check = MakeChoice(p2, "P2");
-        }
-
         std::unique_ptr<Player<int>> player2(p2);
 
         std::cout << "Let us start the battle! Player 1 goes first.\n\n";
 
-        while (player1->aliveCheck() && player2->aliveCheck())
-        {
-
-            std::string turnChoice;
-
-            std::cout << "\nPLAYER 1's TURN:\n\n";
-
-            if (player2->dealtStun)
-                std::cout << "Player 1 has been stunned, so their turn has been skipped.\n";
-
-            else if (!(player1->aliveCheck()))
-                break;
-
-            else
-            {
-                std::cout << "Player 1, enter 1 to attack, enter anything else to heal.\n";
-                std::cin >> turnChoice;
-                std::cout << "-------------------------------------\n";
-
-                if (turnChoice == "1" && !(player2->dealtStun))
-                    player2->TakeDamage(player1->Attack());
-
-                else
-                    player1->Heal();
-                
-                std::cout << "-------------------------------------\n";
-            }
-
-            std::cout << "\nPLAYER 2's TURN:\n\n";
-
-            if (player1->dealtStun)
-                std::cout << "Player 2 has been stunned, so their turn has been skipped.\n";
-
-            else if (!(player2->aliveCheck()))
-                break;
-
-            else
-            {
-                std::cout << "Player 2, enter 1 to attack, enter anything else to heal.\n";
-                std::cin >> turnChoice;
-                std::cout << "-------------------------------------\n";
-                if (turnChoice == "1" && !(player1->dealtStun))
-                    player1->TakeDamage(player2->Attack());
-
-                else if (!(player1->dealtStun))
-                    player2->Heal();
-
-                std::cout << "-------------------------------------\n";
-            }
-        }
-
-        if (p1->aliveCheck())
-            std::cout << "Player 1: " << player1->GetPlayerType() << " is the winner!\n\n";
-        else
-            std::cout << "Player 2: " << player2->GetPlayerType() << " is the winner!\n\n";
+        InitiateCombat(player1, player2);
+        DecideWinner(player1, player2);
     }
 };
 
